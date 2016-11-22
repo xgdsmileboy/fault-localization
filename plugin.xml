@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+   <extension
+     point="org.eclipse.ui.commands">
+     <category
+        id="localization.commands.category"
+        name="Localization">
+      </category>
+      <command
+		    categoryId="localization.commands.category"
+		    id="localization.commands.instrument"
+		    name="Instrument">
+      </command>
+      <command
+		    categoryId="localization.commands.category"
+		    id="localization.commands.deinstrument"
+		    name="DeInstrument">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="localization.handler.instrument.Instrument"
+            commandId="localization.commands.instrument">
+      </handler>
+      <handler
+            class="localization.handler.instrument.DeInstrument"
+            commandId="localization.commands.deinstrument">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               id="localization.menus.sampleMenu"
+               label="Localization"
+               mnemonic="M">
+            <command
+                  commandId="localization.commands.instrument"
+                  id="localozation.menus.instrument"
+                  mnemonic="S">
+            </command>
+            <command
+                  commandId="localization.commands.deinstrument"
+                  id="localozation.menus.deinstrument"
+                  mnemonic="F">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+   
+</plugin>
