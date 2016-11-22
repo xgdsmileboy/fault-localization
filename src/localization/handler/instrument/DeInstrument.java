@@ -33,6 +33,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import localization.common.java.JavaFile;
 import localization.common.java.JavaPackage;
 import localization.common.java.JavaProject;
+import localization.common.tools.AutoCodeFormatter;
 import localization.common.tools.Console;
 import localization.common.util.Configure;
 import localization.common.util.Debugger;
@@ -58,6 +59,7 @@ public class DeInstrument extends AbstractHandler {
 					IProject project = (IProject) ((IAdaptable) element).getAdapter(IProject.class);
 					JavaProject javaProject = new JavaProject(project);
 					removeCode(javaProject);
+					AutoCodeFormatter.format(javaProject);
 				}
 			} else if (selection instanceof TextSelection) {
 				TextSelection textSelection = (TextSelection) selection;
@@ -81,6 +83,7 @@ public class DeInstrument extends AbstractHandler {
 				try {
 					iCompilationUnit = iPackageFragment.createCompilationUnit(iJavaElement.getElementName(),
 							javaFile.getCompilcationUnit().toString(), true, null);
+					AutoCodeFormatter.format(javaFile);
 				} catch (JavaModelException e) {
 					e.printStackTrace();
 				}

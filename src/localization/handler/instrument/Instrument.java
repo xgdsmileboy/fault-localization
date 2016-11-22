@@ -8,6 +8,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -54,6 +55,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import localization.common.java.JavaFile;
 import localization.common.java.JavaPackage;
 import localization.common.java.JavaProject;
+import localization.common.tools.AutoCodeFormatter;
 import localization.common.tools.Console;
 import localization.common.util.Configure;
 import localization.common.util.Debugger;
@@ -62,7 +64,7 @@ public class Instrument extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
+
 		Console.setConsole();
 		
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
@@ -78,7 +80,9 @@ public class Instrument extends AbstractHandler {
 				if (element instanceof IAdaptable) {
 					IProject project = (IProject) ((IAdaptable) element).getAdapter(IProject.class);
 					JavaProject javaProject = new JavaProject(project);
+					AutoCodeFormatter.format(javaProject);
 					insertCode(javaProject);
+					AutoCodeFormatter.format(javaProject);
 				}
 			} else if (selection instanceof TextSelection) {
 				TextSelection textSelection = (TextSelection) selection;
@@ -89,7 +93,7 @@ public class Instrument extends AbstractHandler {
 					iJavaElement = iJavaElement.getParent();
 				}
 				ICompilationUnit iCompilationUnit = (ICompilationUnit) iJavaElement;
-
+				
 				IJavaElement ipackageElement = iCompilationUnit.getParent();
 				while (ipackageElement.getElementType() != IJavaElement.PACKAGE_FRAGMENT) {
 					ipackageElement = ipackageElement.getParent();
@@ -102,6 +106,9 @@ public class Instrument extends AbstractHandler {
 				try {
 					iCompilationUnit = iPackageFragment.createCompilationUnit(iJavaElement.getElementName(),
 							javaFile.getCompilcationUnit().toString(), true, null);
+					
+					AutoCodeFormatter.format(javaFile);
+					
 				} catch (JavaModelException e) {
 					e.printStackTrace();
 				}
