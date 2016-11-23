@@ -8,8 +8,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import localization.common.tools.AutoCodeFormatter;
-
 public class JavaFile {
 
 	ICompilationUnit iCompilationUnit;

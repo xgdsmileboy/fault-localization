@@ -80,7 +80,6 @@ public class Instrument extends AbstractHandler {
 				if (element instanceof IAdaptable) {
 					IProject project = (IProject) ((IAdaptable) element).getAdapter(IProject.class);
 					JavaProject javaProject = new JavaProject(project);
-					AutoCodeFormatter.format(javaProject);
 					insertCode(javaProject);
 					AutoCodeFormatter.format(javaProject);
 				}

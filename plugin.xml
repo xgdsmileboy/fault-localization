@@ -16,6 +16,11 @@
 		    id="localization.commands.deinstrument"
 		    name="DeInstrument">
       </command>
+      <command
+		    categoryId="localization.commands.category"
+		    id="localization.commands.codeformat"
+		    name="Code Format">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -26,6 +31,10 @@
       <handler
             class="localization.handler.instrument.DeInstrument"
             commandId="localization.commands.deinstrument">
+      </handler>
+      <handler
+            class="localization.common.handler.CodeFormatHandler"
+            commandId="localization.commands.codeformat">
       </handler>
    </extension>
    <extension
@@ -38,13 +47,15 @@
                mnemonic="M">
             <command
                   commandId="localization.commands.instrument"
-                  id="localozation.menus.instrument"
-                  mnemonic="S">
+                  id="localozation.menus.instrument">
             </command>
             <command
                   commandId="localization.commands.deinstrument"
-                  id="localozation.menus.deinstrument"
-                  mnemonic="F">
+                  id="localozation.menus.deinstrument">
+            </command>
+            <command
+                  commandId="localization.commands.codeformat"
+                  id="localozation.menus.codeformat">
             </command>
          </menu>
       </menuContribution>
