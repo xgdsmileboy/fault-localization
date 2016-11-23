@@ -7,11 +7,14 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -52,6 +55,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import localization.common.java.CompileUnit;
 import localization.common.java.JavaFile;
 import localization.common.java.JavaPackage;
 import localization.common.java.JavaProject;
@@ -79,9 +83,7 @@ public class Instrument extends AbstractHandler {
 				Object element = structuredSelection.getFirstElement();
 				if (element instanceof IAdaptable) {
 					IProject project = (IProject) ((IAdaptable) element).getAdapter(IProject.class);
-					JavaProject javaProject = new JavaProject(project);
-					insertCode(javaProject);
-					AutoCodeFormatter.format(javaProject);
+					insertCode(project);
 				}
 			} else if (selection instanceof TextSelection) {
 				TextSelection textSelection = (TextSelection) selection;
@@ -98,15 +100,12 @@ public class Instrument extends AbstractHandler {
 					ipackageElement = ipackageElement.getParent();
 				}
 				IPackageFragment iPackageFragment = (IPackageFragment) ipackageElement;
-
-				JavaFile javaFile = new JavaFile(iCompilationUnit);
-				insertCode(javaFile.getCompilcationUnit());
-
+				CompilationUnit compilationUnit = CompileUnit.genASTFromICU(iCompilationUnit);
 				try {
 					iCompilationUnit = iPackageFragment.createCompilationUnit(iJavaElement.getElementName(),
-							javaFile.getCompilcationUnit().toString(), true, null);
+							compilationUnit.toString(), true, null);
 					
-					AutoCodeFormatter.format(javaFile);
+					AutoCodeFormatter.format(iCompilationUnit);
 					
 				} catch (JavaModelException e) {
 					e.printStackTrace();
@@ -116,19 +115,29 @@ public class Instrument extends AbstractHandler {
 		}
 		return null;
 	}
-
-	private boolean insertCode(JavaProject javaProject) {
-		for (JavaPackage javaPackage : javaProject.getJavaPackage()) {
-			for (JavaFile javaFile : javaPackage.getJavaFiles()) {
-				insertCode(javaFile.getCompilcationUnit());
-				try {
-					ICompilationUnit iCompilationUnit = javaPackage.getIPackageFragment().createCompilationUnit(
-							javaFile.getICompilationUnit().getElementName(), javaFile.getCompilcationUnit().toString(),
-							true, null);
-				} catch (JavaModelException e) {
-					e.printStackTrace();
+	
+	public boolean insertCode(IProject project){
+		try {
+			if (project.isNatureEnabled("org.eclipse.jdt.core.javanature") && project.isOpen()) {
+				IJavaProject iJavaProject = JavaCore.create(project);
+				for (IPackageFragment iPackageFragment : iJavaProject.getPackageFragments()) {
+					for (ICompilationUnit iCompilationUnit : iPackageFragment.getCompilationUnits()) {
+						CompilationUnit compilationUnit = CompileUnit.genASTFromICU(iCompilationUnit);
+						insertCode(compilationUnit);
+						ICompilationUnit iCUnit = iPackageFragment.createCompilationUnit(
+								iCompilationUnit.getElementName(), compilationUnit.toString(), true, null);
+						AutoCodeFormatter.format(iCUnit);
+					}
+				}
+			} else {
+				if (Debugger.debugOn) {
+					Debugger.debug("@JavaProject$JavaProject project: " + project.getName() + "is closed!");
 				}
 			}
+		} catch (JavaModelException e) {
+			e.printStackTrace();
+		} catch (CoreException e) {
+			e.printStackTrace();
 		}
 		return true;
 	}

@@ -2,6 +2,7 @@ package localization.common.tools;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -13,6 +14,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -23,9 +25,31 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import localization.common.java.JavaFile;
 import localization.common.java.JavaProject;
+import localization.common.util.Debugger;
 
 public class AutoCodeFormatter {
 
+	public static void format(IProject project){
+		try {
+			if (project.isNatureEnabled("org.eclipse.jdt.core.javanature") && project.isOpen()) {
+				IJavaProject iJavaProject = JavaCore.create(project);
+				for (IPackageFragment iPackageFragment : iJavaProject.getPackageFragments()) {
+					for (ICompilationUnit iCompilationUnit : iPackageFragment.getCompilationUnits()) {
+						AutoCodeFormatter.format(iCompilationUnit);
+					}
+				}
+			} else {
+				if (Debugger.debugOn) {
+					Debugger.debug("@JavaProject$JavaProject project: " + project.getName() + "is closed!");
+				}
+			}
+		} catch (JavaModelException e) {
+			e.printStackTrace();
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void format(JavaProject javaProject) {
 
 		CodeFormatJob job = new CodeFormatJob(javaProject);
@@ -37,14 +61,6 @@ public class AutoCodeFormatter {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-//		while (!job.done()) {
-//			try {
-//				Thread.sleep(1000);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		job = null;
 	}
 
 	public static void format(JavaFile javaFile) {
@@ -58,14 +74,19 @@ public class AutoCodeFormatter {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-//		while(!job.done()){
-//			try {
-//				Thread.sleep(1000);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		job = null;
+	}
+	
+	public static void format(ICompilationUnit iCompilationUnit) {
+		
+		CodeFormatJob job = new CodeFormatJob(iCompilationUnit);
+
+		try {
+			ProgressMonitorDialog monitorDialog = new ProgressMonitorDialog(null);
+			monitorDialog.run(true, false, job);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
 
@@ -73,16 +94,18 @@ class CodeFormatJob implements IRunnableWithProgress {
 
 	private JavaProject jProject = null;
 	private JavaFile jFile = null;
-	private boolean done = false;
+	private ICompilationUnit iCUnit = null;
 
 	public CodeFormatJob(JavaProject javaProject) {
 		this.jProject = javaProject;
-		done = false;
 	}
 
 	public CodeFormatJob(JavaFile javaFile) {
 		jFile = javaFile;
-		done = false;
+	}
+	
+	public CodeFormatJob(ICompilationUnit iCompilationUnit){
+		iCUnit = iCompilationUnit;
 	}
 
 	@Override
@@ -120,12 +143,15 @@ class CodeFormatJob implements IRunnableWithProgress {
 			} catch (CoreException e) {
 				e.printStackTrace();
 			}
+		} else if(iCUnit != null){
+			IJavaProject iJavaProject = iCUnit.getJavaProject();
+			String lineDelimiter = StubUtility.getLineDelimiterUsed(iJavaProject);
+			try {
+				format(monitor, iCUnit, lineDelimiter);
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
 		}
-		done = true;
-	}
-
-	public boolean done() {
-		return this.done;
 	}
 
 	private void format(IProgressMonitor monitor, ICompilationUnit parentCU, String lineDelimiter)

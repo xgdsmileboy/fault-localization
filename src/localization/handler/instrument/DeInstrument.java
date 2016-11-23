@@ -7,10 +7,13 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -30,6 +33,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import localization.common.java.CompileUnit;
 import localization.common.java.JavaFile;
 import localization.common.java.JavaPackage;
 import localization.common.java.JavaProject;
@@ -42,9 +46,9 @@ public class DeInstrument extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
+
 		Console.setConsole();
-		
+
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
 		IWorkbenchPage activePage = window.getActivePage();
 		ISelection selection = activePage.getSelection();
@@ -57,9 +61,7 @@ public class DeInstrument extends AbstractHandler {
 				Object element = structuredSelection.getFirstElement();
 				if (element instanceof IAdaptable) {
 					IProject project = (IProject) ((IAdaptable) element).getAdapter(IProject.class);
-					JavaProject javaProject = new JavaProject(project);
-					removeCode(javaProject);
-					AutoCodeFormatter.format(javaProject);
+					removeCode(project);
 				}
 			} else if (selection instanceof TextSelection) {
 				TextSelection textSelection = (TextSelection) selection;
@@ -77,13 +79,12 @@ public class DeInstrument extends AbstractHandler {
 				}
 				IPackageFragment iPackageFragment = (IPackageFragment) ipackageElement;
 
-				JavaFile javaFile = new JavaFile(iCompilationUnit);
-				removeCode(javaFile.getCompilcationUnit());
-
+				CompilationUnit compilationUnit = CompileUnit.genASTFromICU(iCompilationUnit);
+				removeCode(compilationUnit);
 				try {
 					iCompilationUnit = iPackageFragment.createCompilationUnit(iJavaElement.getElementName(),
-							javaFile.getCompilcationUnit().toString(), true, null);
-					AutoCodeFormatter.format(javaFile);
+							compilationUnit.toString(), true, null);
+					AutoCodeFormatter.format(iCompilationUnit);
 				} catch (JavaModelException e) {
 					e.printStackTrace();
 				}
@@ -93,18 +94,28 @@ public class DeInstrument extends AbstractHandler {
 		return null;
 	}
 
-	private boolean removeCode(JavaProject javaProject) {
-		for (JavaPackage javaPackage : javaProject.getJavaPackage()) {
-			for (JavaFile javaFile : javaPackage.getJavaFiles()) {
-				removeCode(javaFile.getCompilcationUnit());
-				try {
-					ICompilationUnit iCompilationUnit = javaPackage.getIPackageFragment().createCompilationUnit(
-							javaFile.getICompilationUnit().getElementName(), javaFile.getCompilcationUnit().toString(),
-							true, null);
-				} catch (JavaModelException e) {
-					e.printStackTrace();
+	private boolean removeCode(IProject project) {
+		try {
+			if (project.isNatureEnabled("org.eclipse.jdt.core.javanature") && project.isOpen()) {
+				IJavaProject iJavaProject = JavaCore.create(project);
+				for (IPackageFragment iPackageFragment : iJavaProject.getPackageFragments()) {
+					for (ICompilationUnit iCompilationUnit : iPackageFragment.getCompilationUnits()) {
+						CompilationUnit compilationUnit = CompileUnit.genASTFromICU(iCompilationUnit);
+						removeCode(compilationUnit);
+						ICompilationUnit iCUnit = iPackageFragment.createCompilationUnit(
+								iCompilationUnit.getElementName(), compilationUnit.toString(), true, null);
+						AutoCodeFormatter.format(iCUnit);
+					}
+				}
+			} else {
+				if (Debugger.debugOn) {
+					Debugger.debug("@JavaProject$JavaProject project: " + project.getName() + "is closed!");
 				}
 			}
+		} catch (JavaModelException e) {
+			e.printStackTrace();
+		} catch (CoreException e) {
+			e.printStackTrace();
 		}
 		return true;
 	}

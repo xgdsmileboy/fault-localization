@@ -42,8 +42,7 @@ public class CodeFormatHandler extends AbstractHandler {
 				Object element = structuredSelection.getFirstElement();
 				if (element instanceof IAdaptable) {
 					IProject project = (IProject) ((IAdaptable) element).getAdapter(IProject.class);
-					JavaProject javaProject = new JavaProject(project);
-					AutoCodeFormatter.format(javaProject);
+					AutoCodeFormatter.format(project);
 				}
 			} else if (selection instanceof TextSelection) {
 				TextSelection textSelection = (TextSelection) selection;
@@ -54,8 +53,7 @@ public class CodeFormatHandler extends AbstractHandler {
 					iJavaElement = iJavaElement.getParent();
 				}
 				ICompilationUnit iCompilationUnit = (ICompilationUnit) iJavaElement;
-				JavaFile javaFile = new JavaFile(iCompilationUnit);
-				AutoCodeFormatter.format(javaFile);
+				AutoCodeFormatter.format(iCompilationUnit);
 
 			}
 		}
