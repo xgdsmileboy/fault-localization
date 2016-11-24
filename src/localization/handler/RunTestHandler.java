@@ -18,8 +18,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import localization.common.tools.Console;
 import localization.common.util.Configure;
+import localization.common.util.Console;
 
 public class RunTestHandler extends AbstractHandler {
 

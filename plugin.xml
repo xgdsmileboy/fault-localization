@@ -25,15 +25,15 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="localization.handler.instrument.Instrument"
+            class="localization.instrument.handler.InstrumentHandler"
             commandId="localization.commands.instrument">
       </handler>
       <handler
-            class="localization.handler.instrument.DeInstrument"
+            class="localization.instrument.handler.DeInstrumentHandler"
             commandId="localization.commands.deinstrument">
       </handler>
       <handler
-            class="localization.common.handler.CodeFormatHandler"
+            class="localization.codeformat.handler.CodeFormatHandler"
             commandId="localization.commands.codeformat">
       </handler>
    </extension>

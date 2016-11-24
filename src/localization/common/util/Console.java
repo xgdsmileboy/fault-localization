@@ -1,4 +1,4 @@
-package localization.common.tools;
+package localization.common.util;
 
 import java.io.PrintStream;
 
@@ -27,7 +27,8 @@ public class Console {
 	public static void setConsole(){
 		MessageConsole console = Console.findConsole("Localization:console");
 		MessageConsoleStream stream = console.newMessageStream();
-		System.setErr(new PrintStream(stream));
+//		System.setErr(new PrintStream(stream));
+//		System.setErr(null);
 		System.setOut(new PrintStream(stream));
 		console.clearConsole();
 	}
