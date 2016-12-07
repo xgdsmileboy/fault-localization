@@ -21,6 +21,11 @@
 		    id="localization.commands.codeformat"
 		    name="Code Format">
       </command>
+      <command
+		    categoryId="localization.commands.category"
+		    id="localization.commands.runtest"
+		    name="Run Test">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -35,6 +40,10 @@
       <handler
             class="localization.codeformat.handler.CodeFormatHandler"
             commandId="localization.commands.codeformat">
+      </handler>
+      <handler
+            class="localization.runtest.handler.RunTestHandler"
+            commandId="localization.commands.runtest">
       </handler>
    </extension>
    <extension
@@ -56,6 +65,10 @@
             <command
                   commandId="localization.commands.codeformat"
                   id="localozation.menus.codeformat">
+            </command>
+            <command
+                  commandId="localization.commands.runtest"
+                  id="localozation.menus.runtest">
             </command>
          </menu>
       </menuContribution>

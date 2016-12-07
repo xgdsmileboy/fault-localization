@@ -1,7 +1,6 @@
 package localization.instrument.handler;
 
 import java.lang.reflect.InvocationTargetException;
-import java.nio.Buffer;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IProject;
@@ -40,6 +39,8 @@ import localization.instrument.visitor.TraversalVisitor;
 public class PerformInstrument {
 
 	public static void execute(ExecutionEvent event, TraversalVisitor traversalVisitor) {
+
+		System.out.println("execute command");
 
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
 		IWorkbenchPage activePage = window.getActivePage();
@@ -132,7 +133,7 @@ class PerformJob implements IRunnableWithProgress {
 
 	private boolean perform(ICompilationUnit iCompilationUnit, IProgressMonitor monitor) {
 		try {
-			
+
 			iCompilationUnit.becomeWorkingCopy(new SubProgressMonitor(monitor, 2));
 
 			CompilationUnit compilationUnit = JavaFile.genASTFromICU(iCompilationUnit);

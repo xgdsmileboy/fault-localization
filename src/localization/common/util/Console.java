@@ -25,11 +25,19 @@ public class Console {
 	}
 	
 	public static void setConsole(){
+		//output console
 		MessageConsole console = Console.findConsole("Localization:console");
 		MessageConsoleStream stream = console.newMessageStream();
 //		System.setErr(new PrintStream(stream));
 //		System.setErr(null);
 		System.setOut(new PrintStream(stream));
 		console.clearConsole();
+		
+		//output file
+//		try {
+//			System.setOut(new PrintStream(new FileOutputStream("output.txt")));
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		}
 	}
 }

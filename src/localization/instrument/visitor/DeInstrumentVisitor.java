@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 
-import localization.common.util.Configure;
+import localization.common.util.Constant;
 
 public class DeInstrumentVisitor extends TraversalVisitor {
 
@@ -66,7 +66,7 @@ public class DeInstrumentVisitor extends TraversalVisitor {
 			List<Object> args = node.arguments();
 			if (args != null && args.size() > 0 && args.get(0) instanceof StringLiteral) {
 				StringLiteral stringLiteral = (StringLiteral) args.get(0);
-				if (stringLiteral.getLiteralValue().startsWith(Configure.INSTRUMENT_FLAG)) {
+				if (stringLiteral.getLiteralValue().startsWith(Constant.INSTRUMENT_FLAG)) {
 					return true;
 				}
 			}

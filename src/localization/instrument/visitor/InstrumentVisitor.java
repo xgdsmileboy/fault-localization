@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import localization.common.util.Configure;
+import localization.common.util.Constant;
 import localization.common.util.Debugger;
 
 public class InstrumentVisitor extends TraversalVisitor {
@@ -80,7 +80,7 @@ public class InstrumentVisitor extends TraversalVisitor {
 	public boolean visit(MethodDeclaration node) {
 		String location = KEY_TYPE + clazzName + SEGMENT_SEPARATOR + KEY_METHOD
 				+ node.getName().getFullyQualifiedName();
-		String message = Configure.INSTRUMENT_FLAG + location;
+		String message = Constant.INSTRUMENT_FLAG + location;
 		Block methodBody = node.getBody();
 
 		if (methodBody == null) {
